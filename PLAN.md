@@ -218,3 +218,60 @@
 - htmx は static/htmx.min.js として同梱する前提にする。実装時にネットワーク取得が使えない場合は CDN 参照ではなく最小フォールバック方針を README に記載する。
 - TypeScript build は MVP では導入せず、selector picker は手書きの Vanilla JS で実装する。将来 TS 化できるよう frontend/ は今回は作らないか、README 上の拡張余地として扱う。
 - 認証と CSRF は MVP 非対象だが、POST route と shared app state/middleware 構成で後から追加可能にする。
+
+## Next Phase Plan
+
+MVP の土台は実装済み。次は実サイトで使いやすくするため、selector 設定の作業導線と公開運用前の安全性を優先する。
+
+### 1. Selector picker と feed form の連携
+
+- picker を独立画面だけでなく、feed 作成/編集フォームから開けるようにする。
+- selector 入力欄ごとに picker 起動ボタンを置き、選択結果を対象 input に反映する。
+- 反映対象は item/title/link/date/content selector の 5 種類に限定する。
+- picker 側は URL と target field を query parameter で受け取り、選択後に `window.opener` または同一画面 UI へ値を戻す。
+- 成功条件: 手動コピーなしで selector をフォームへ入力できる。
+
+### 2. 新規作成画面での preview 対応
+
+- 現状の preview は編集画面中心なので、新規作成前にも抽出結果を確認できるようにする。
+- `POST /feeds/preview` を追加し、未保存の FeedForm を使って fetch/extract preview を返す。
+- DB の `feed_items` は更新しない。
+- 成功条件: Feed 保存前に item/title/link/content の抽出結果を確認できる。
+
+### 3. 実サイト抽出の堅牢化
+
+- UTF-8 以外の charset に対応する。
+- Content-Type が欠落/不正確なサイトへの扱いを設定で緩和できるようにする。
+- date 抽出は RFC3339/RFC2822 以外の代表的な日付文字列を扱えるようにする。
+- preview で selector ごとの match count を表示する。
+- 成功条件: 静的 HTML のニュース/ブログ系サイトで selector 調整がしやすくなる。
+
+### 4. HTML sanitizer の強化
+
+- MVP の文字列ベース sanitizer を見直し、可能なら `ammonia` などの crate に置き換える。
+- `script`, `iframe`, `object`, `embed`, event handler 属性の除去は維持する。
+- picker 用 HTML に `<base href="...">` を挿入し、相対 CSS/image URL の表示崩れを減らす。
+- 成功条件: picker の安全性と表示再現性を改善する。
+
+### 5. 認証と CSRF
+
+- LAN 外に出す前提がある場合は最優先で追加する。
+- まずは単一管理者向けの Basic Auth または reverse proxy 前提の shared secret middleware を検討する。
+- 変更系 POST に CSRF token を導入する。
+- 成功条件: 管理画面を公開ネットワークに置く場合の最低限の防御を持つ。
+
+### 6. Integration tests
+
+- 一時 SQLite DB で feed CRUD と RSS 生成フローを通す。
+- preview route で invalid selector / unsupported xpath / fetch error が user-facing error になることを確認する。
+- fetcher は mock HTTP server を使い、redirect limit/body limit/content-type を確認する。
+- 成功条件: MVP の主要 route と fetch guard の退行を検知できる。
+
+### Recommended Order
+
+1. Selector picker と feed form の連携
+2. 新規作成画面での preview 対応
+3. Integration tests
+4. 実サイト抽出の堅牢化
+5. HTML sanitizer の強化
+6. 認証と CSRF
