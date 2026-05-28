@@ -28,21 +28,12 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             archive: feedsmith-x86_64-unknown-linux-gnu.tar.gz
             os: ubuntu-latest
-            apt: ""
-            linker: ""
-            cc: ""
           - target: aarch64-unknown-linux-gnu
             archive: feedsmith-aarch64-unknown-linux-gnu.tar.gz
-            os: ubuntu-latest
-            apt: gcc-aarch64-linux-gnu
-            linker: aarch64-linux-gnu-gcc
-            cc: aarch64-linux-gnu-gcc
+            os: ubuntu-24.04-arm
           - target: aarch64-apple-darwin
             archive: feedsmith-aarch64-apple-darwin.tar.gz
             os: macos-latest
-            apt: ""
-            linker: ""
-            cc: ""
 
     steps:
       - name: Checkout
@@ -60,16 +51,7 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Install cross compiler
-        if: matrix.apt != ''
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ${{ matrix.apt }}
-
       - name: Build
-        env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.linker }}
-          CC_aarch64_unknown_linux_gnu: ${{ matrix.cc }}
         run: cargo build --release --locked --target ${{ matrix.target }}
 
       - name: Package
