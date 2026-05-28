@@ -1,0 +1,21 @@
+{% match error %}
+{% when Some with (message) %}
+<div class="error">{{ message }}</div>
+{% when None %}
+  {% if items.len() == 0 %}
+  <div class="empty">No items matched.</div>
+  {% else %}
+  <ol class="preview-list">
+    {% for item in items %}
+    <li>
+      <strong>{{ item.title }}</strong>
+      <a href="{{ item.link }}" rel="noreferrer">{{ item.link }}</a>
+      {% match item.date_text %}
+      {% when Some with (date) %}<span class="muted">{{ date }}</span>{% when None %}{% endmatch %}
+      {% match item.content %}
+      {% when Some with (content) %}<p>{{ content }}</p>{% when None %}{% endmatch %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+{% endmatch %}

@@ -1,0 +1,37 @@
+{% if feeds.len() == 0 %}
+<div class="empty">No feeds yet.</div>
+{% else %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Site</th>
+      <th>Selectors</th>
+      <th class="actions">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for feed in feeds %}
+    <tr>
+      <td>
+        <strong>{{ feed.name }}</strong>
+        {% match feed.feed_description %}
+        {% when Some with (description) %}
+        <div class="muted">{{ description }}</div>
+        {% when None %}
+        {% endmatch %}
+      </td>
+      <td><a href="{{ feed.site_url }}" rel="noreferrer">{{ feed.site_url }}</a></td>
+      <td><code>{{ feed.item_selector }}</code></td>
+      <td class="actions">
+        <a class="button" href="/feeds/{{ feed.id }}/rss.xml">RSS</a>
+        <a class="button" href="/feeds/{{ feed.id }}/edit">Edit</a>
+        <form method="post" action="/feeds/{{ feed.id }}/delete" hx-post="/feeds/{{ feed.id }}/delete" hx-target="#feed-table" hx-swap="innerHTML">
+          <button class="button danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}

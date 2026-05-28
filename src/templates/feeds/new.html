@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}New Feed - Feedsmith{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>New feed</h1>
+    <p>Create a CSS-selector based feed definition.</p>
+  </div>
+</section>
+
+<form class="panel form-grid" method="post" action="/feeds" hx-post="/feeds" hx-target="#created-result" hx-swap="innerHTML">
+  <label>Name <input name="name" required></label>
+  <label>Site URL <input name="site_url" type="url" required placeholder="https://example.com/news"></label>
+  <label>Description <input name="feed_description"></label>
+  <input type="hidden" name="selector_type" value="css">
+  <label>Item selector <input name="item_selector" required placeholder="article"></label>
+  <label>Title selector <input name="title_selector" required placeholder="h2, .title"></label>
+  <label>Link selector <input name="link_selector" placeholder="a"></label>
+  <label>Date selector <input name="date_selector" placeholder="time"></label>
+  <label>Content selector <input name="content_selector" placeholder=".summary"></label>
+  <div class="form-actions">
+    <button class="button primary" type="submit">Create</button>
+    <a class="button" href="/">Back</a>
+  </div>
+</form>
+
+<div id="created-result" class="mt"></div>
+{% endblock %}

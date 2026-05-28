@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Feedsmith{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>Feeds</h1>
+    <p>Generate RSS feeds from pages that expose repeated article markup.</p>
+  </div>
+  <a class="button primary" href="/feeds/new">New feed</a>
+</section>
+
+<div id="feed-table">
+  {% include "feeds/_feed_table.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}Selector Picker - Feedsmith{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>Selector picker</h1>
+    <p>Fetch sanitized HTML and click an element to generate a CSS selector.</p>
+  </div>
+</section>
+
+<section class="panel picker-controls">
+  <label>URL <input id="picker-url" type="url" placeholder="https://example.com/news"></label>
+  <button id="picker-fetch" class="button primary" type="button">Fetch</button>
+  <label>Selected selector <input id="picker-selector" readonly></label>
+</section>
+
+<iframe id="picker-frame" class="picker-frame" sandbox="allow-same-origin"></iframe>
+<script src="/static/selector-picker.js"></script>
+{% endblock %}

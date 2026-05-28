@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Feed - Feedsmith{% endblock %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <h1>Edit feed</h1>
+    <p>{{ feed.name }}</p>
+  </div>
+  <a class="button" href="/feeds/{{ feed.id }}/rss.xml">RSS</a>
+</section>
+
+<form id="feed-form" class="panel form-grid" method="post" action="/feeds/{{ feed.id }}">
+  <label>Name <input name="name" required value="{{ feed.name }}"></label>
+  <label>Site URL <input name="site_url" type="url" required value="{{ feed.site_url }}"></label>
+  <label>Description
+    <input name="feed_description" value="{% match feed.feed_description %}{% when Some with (description) %}{{ description }}{% when None %}{% endmatch %}">
+  </label>
+  <input type="hidden" name="selector_type" value="css">
+  <label>Item selector <input name="item_selector" required value="{{ feed.item_selector }}"></label>
+  <label>Title selector <input name="title_selector" required value="{{ feed.title_selector }}"></label>
+  <label>Link selector
+    <input name="link_selector" value="{% match feed.link_selector %}{% when Some with (value) %}{{ value }}{% when None %}{% endmatch %}">
+  </label>
+  <label>Date selector
+    <input name="date_selector" value="{% match feed.date_selector %}{% when Some with (value) %}{{ value }}{% when None %}{% endmatch %}">
+  </label>
+  <label>Content selector
+    <input name="content_selector" value="{% match feed.content_selector %}{% when Some with (value) %}{{ value }}{% when None %}{% endmatch %}">
+  </label>
+  <div class="form-actions">
+    <button class="button primary" type="submit">Save</button>
+    <button class="button" type="submit" hx-post="/feeds/{{ feed.id }}/preview" hx-target="#preview" hx-swap="innerHTML">Preview</button>
+    <a class="button" href="/">Back</a>
+  </div>
+</form>
+
+<section class="mt">
+  <h2>Preview</h2>
+  <div id="preview" class="panel muted">Run preview to inspect extracted items.</div>
+</section>
+{% endblock %}
