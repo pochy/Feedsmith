@@ -38,6 +38,119 @@ cargo run
 DATABASE_URL=sqlite://feedsmith.db cargo run
 ```
 
+## リリースバイナリ
+
+GitHub Actions でタグ push 時に Linux/macOS 向けリリースバイナリをビルドし、
+GitHub Release に `tar.gz` と SHA-256 チェックサムを添付します。
+
+作成される成果物は以下です。
+
+- `feedsmith-x86_64-unknown-linux-gnu.tar.gz`: x86_64 Linux 用
+- `feedsmith-aarch64-unknown-linux-gnu.tar.gz`: 64-bit Raspberry Pi OS / aarch64 Linux 用
+- `feedsmith-aarch64-apple-darwin.tar.gz`: Apple Silicon macOS 用
+
+各アーカイブには以下が含まれます。
+
+- `feedsmith`: 実行ファイル
+- `static/`: 実行時に必要な CSS/JavaScript
+- `README.md`: 利用手順
+
+### リリースを作成する
+
+まず、GitHub Actions workflow を含む変更を commit して `main` に push します。
+
+```sh
+git add README.md .github/workflows
+git commit -m "Add GitHub Actions release builds"
+git push origin main
+```
+
+次に、リリース用のタグを作成して push します。タグ名は `v` から始めます。
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+タグを push すると、GitHub の `Actions` タブで `Release` workflow が実行
+されます。成功すると、GitHub の `Releases` に `tar.gz` と `.sha256` が添付
+されます。
+
+タグを付け直したい場合は、既存タグを削除してから作り直してください。
+公開済みリリースのタグを変更すると利用者側で混乱しやすいため、通常は
+`v0.1.1` のように新しいタグを作ることを推奨します。
+
+### 手動で workflow を実行する
+
+GitHub の画面から手動実行することもできます。
+
+1. GitHub のリポジトリで `Actions` を開きます。
+2. `Release` workflow を選びます。
+3. `Run workflow` をクリックします。
+4. `tag` に `v0.1.0` のようなタグ名を入力します。
+5. 実行が成功したら `Releases` を確認します。
+
+手動実行でも、指定したタグのソースコードを checkout してビルドします。
+
+### どのファイルを使うか
+
+Raspberry Pi 4B では、64-bit Raspberry Pi OS 向けの
+`feedsmith-aarch64-unknown-linux-gnu.tar.gz` を使います。
+
+macOS では、Apple Silicon 向けの
+`feedsmith-aarch64-apple-darwin.tar.gz` を使います。
+
+x86_64 Linux サーバーでは `feedsmith-x86_64-unknown-linux-gnu.tar.gz` を
+使います。
+
+### Raspberry Pi 4B で実行する
+
+GitHub Release から `feedsmith-aarch64-unknown-linux-gnu.tar.gz` と
+`feedsmith-aarch64-unknown-linux-gnu.tar.gz.sha256` をダウンロードします。
+
+チェックサムを確認します。
+
+```sh
+shasum -a 256 -c feedsmith-aarch64-unknown-linux-gnu.tar.gz.sha256
+```
+
+展開して実行します。
+
+```sh
+tar -xzf feedsmith-aarch64-unknown-linux-gnu.tar.gz
+cd feedsmith-aarch64-unknown-linux-gnu
+APP_HOST=0.0.0.0 DATABASE_URL=sqlite://feedsmith.db ./feedsmith
+```
+
+`static/` は実行時に必要なため、展開したディレクトリ内で `feedsmith` を起動
+してください。
+
+起動後、同じ Raspberry Pi 上では <http://127.0.0.1:3000>、同じ LAN 内の別
+マシンからは `http://<raspberry-pi-ip>:3000` を開きます。
+
+### Apple Silicon macOS で実行する
+
+GitHub Release から `feedsmith-aarch64-apple-darwin.tar.gz` と
+`feedsmith-aarch64-apple-darwin.tar.gz.sha256` をダウンロードします。
+
+チェックサムを確認します。
+
+```sh
+shasum -a 256 -c feedsmith-aarch64-apple-darwin.tar.gz.sha256
+```
+
+展開して実行します。
+
+```sh
+tar -xzf feedsmith-aarch64-apple-darwin.tar.gz
+cd feedsmith-aarch64-apple-darwin
+DATABASE_URL=sqlite://feedsmith.db ./feedsmith
+```
+
+macOS では初回実行時に、未署名バイナリとして実行確認が表示される場合が
+あります。その場合は、システム設定のプライバシーとセキュリティで実行を許可
+してください。
+
 ## Docker Compose
 
 ```sh
